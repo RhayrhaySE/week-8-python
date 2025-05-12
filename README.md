@@ -1,80 +1,80 @@
 # week-8-python
 # Task 1: Load and Explore the Dataset
 
+
+# Import required libraries
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.datasets import load_iris
+import seaborn as sns
 
-# Error handling
+# Load the dataset from the local path
+file_path = 'winequality-red.csv'  # Ensure this path is correct and points to your file location
+
 try:
-    iris = load_iris()
-    data = pd.DataFrame(data=iris.data, columns=iris.feature_names)
-    data['species'] = iris.target
-    data['species'] = data['species'].map({i: name for i, name in enumerate(iris.target_names)})
-
+    # Attempt to load the dataset from the local file path
+    df = pd.read_csv(file_path, sep=";")
     print("✅ Dataset loaded successfully!\n")
-    print(data.head())  # Display first 5 rows
-
 except Exception as e:
     print("❌ Error loading dataset:", e)
+    df = None  # Assign None to df if loading fails
 
-# Explore data structure
-print("\n🔍 Data Info:")
-print(data.info())
+# Proceed only if the dataset is loaded successfully
+if df is not None:
+    # Display first few rows
+    print("🔹 First 5 rows of the dataset:")
+    print(df.head())
 
-# Check for missing values
-print("\n🧼 Missing Values:")
-print(data.isnull().sum())
+    # Data structure and missing values
+    print("\n🔹 Dataset Info:")
+    print(df.info())
 
-# No missing values, so no cleaning needed
+    print("\n🔹 Missing Values in Each Column:")
+    print(df.isnull().sum())
 
-# Task 2: Basic Data Analysis
+    # Basic statistics
+    print("\n🔹 Summary Statistics:")
+    print(df.describe())
 
-print("\n📊 Descriptive Statistics:")
-print(data.describe())
+    # Group by 'quality' and calculate mean alcohol
+    print("\n🔹 Average Alcohol Content by Wine Quality:")
+    print(df.groupby('quality')['alcohol'].mean())
 
-# Group by species and get the mean
-grouped = data.groupby('species').mean()
-print("\n📈 Mean values per species:")
-print(grouped)
+    # --------- VISUALIZATIONS ---------
 
-# Task 3: Data Visualization
+    # Set seaborn style
+    sns.set(style="whitegrid")
 
-# Set seaborn theme
-sns.set(style='whitegrid')
+    # Line Chart: Alcohol vs. Wine Quality
+    plt.figure(figsize=(8,5))
+    df.groupby("quality")["alcohol"].mean().plot(kind="line", marker="o", color="blue")
+    plt.title("Average Alcohol by Wine Quality")
+    plt.xlabel("Wine Quality")
+    plt.ylabel("Average Alcohol (%)")
+    plt.grid(True)
+    plt.show()
 
-# Line Chart: Average petal length per species (simulated over index as "time")
-plt.figure(figsize=(8,5))
-for species in data['species'].unique():
-    subset = data[data['species'] == species]
-    plt.plot(subset.index, subset['petal length (cm)'], label=species)
-plt.title("Petal Length Trend (Simulated Over Index)")
-plt.xlabel("Index")
-plt.ylabel("Petal Length (cm)")
-plt.legend()
-plt.show()
+    # Bar Chart: Average Sulphates by Quality
+    plt.figure(figsize=(8,5))
+    df.groupby("quality")["sulphates"].mean().plot(kind="bar", color="lightgreen")
+    plt.title("Average Sulphates by Wine Quality")
+    plt.xlabel("Wine Quality")
+    plt.ylabel("Average Sulphates")
+    plt.show()
 
-# Bar Chart: Average Sepal Width per Species
-plt.figure(figsize=(6,4))
-sns.barplot(x=grouped.index, y=grouped['sepal width (cm)'], palette="viridis")
-plt.title("Average Sepal Width by Species")
-plt.xlabel("Species")
-plt.ylabel("Sepal Width (cm)")
-plt.show()
+    # Histogram: Alcohol Content
+    plt.figure(figsize=(8,5))
+    plt.hist(df["alcohol"], bins=10, color="coral", edgecolor="black")
+    plt.title("Alcohol Content Distribution")
+    plt.xlabel("Alcohol (%)")
+    plt.ylabel("Frequency")
+    plt.show()
 
-# Histogram: Distribution of Petal Length
-plt.figure(figsize=(6,4))
-sns.histplot(data['petal length (cm)'], kde=True, bins=20, color='orange')
-plt.title("Distribution of Petal Length")
-plt.xlabel("Petal Length (cm)")
-plt.show()
-
-# Scatter Plot: Sepal Length vs Petal Length
-plt.figure(figsize=(6,5))
-sns.scatterplot(data=data, x='sepal length (cm)', y='petal length (cm)', hue='species')
-plt.title("Sepal Length vs Petal Length by Species")
-plt.xlabel("Sepal Length (cm)")
-plt.ylabel("Petal Length (cm)")
-plt.legend()
-plt.show()
+    # Scatter Plot: Alcohol vs. Density
+    plt.figure(figsize=(8,5))
+    plt.scatter(df["alcohol"], df["density"], alpha=0.6, color="purple")
+    plt.title("Alcohol vs. Density")
+    plt.xlabel("Alcohol")
+    plt.ylabel("Density")
+    plt.show()
+else:
+    print("❌ Dataset could not be loaded. Please check the file path.")
